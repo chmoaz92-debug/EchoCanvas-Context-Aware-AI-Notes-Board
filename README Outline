@@ -1,0 +1,17 @@
+# EchoCanvas 🧩
+An AI-driven notes board that connects your ideas together using embeddings.
+
+## Features
+- Context-aware note linking
+- Semantic similarity via OpenAI embeddings
+- Real-time board updates with WebSockets
+- Export notes to Markdown or Notion
+
+## Stack
+- Next.js, Tailwind, Zustand
+- FastAPI, PostgreSQL, pgvector
+- Docker-ready deployment
+
+## Setup
+```bash
+docker-compose up --build
