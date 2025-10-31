@@ -1,0 +1,20 @@
+EchoCanvas/
+│
+├── client/                # Next.js frontend
+│   ├── components/
+│   ├── pages/
+│   ├── styles/
+│   └── utils/
+│
+├── server/                # FastAPI backend
+│   ├── api/
+│   ├── db/
+│   ├── embeddings/
+│   └── main.py
+│
+├── docker-compose.yml
+├── requirements.txt
+├── package.json
+├── .env.example
+├── README.md
+└── LICENSE
