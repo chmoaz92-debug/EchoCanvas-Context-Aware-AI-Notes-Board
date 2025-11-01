@@ -1,0 +1,29 @@
+import { useState } from "react";
+
+export default function Home() {
+  const [text, setText] = useState("");
+  const [msg, setMsg] = useState("");
+
+  const saveNote = async () => {
+    const res = await fetch("http://127.0.0.1:8000/add_note", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    setMsg("✅ Note saved!");
+  };
+
+  return (
+    <div className="p-10">
+      <h1 className="text-2xl font-bold mb-3">EchoCanvas</h1>
+      <textarea value={text} onChange={(e)=>setText(e.target.value)}
+        className="border p-3 w-96 h-32" placeholder="Write your thought..." />
+      <br/>
+      <button onClick={saveNote} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded">
+        Save Note
+      </button>
+      <p className="mt-3">{msg}</p>
+    </div>
+  );
+}
