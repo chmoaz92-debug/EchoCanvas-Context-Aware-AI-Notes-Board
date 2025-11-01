@@ -1,0 +1,49 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+import sqlite3, openai, json, numpy as np
+
+app = FastAPI()
+
+openai.api_key = "YOUR_API_KEY"
+
+# ---------- database setup ----------
+conn = sqlite3.connect("database.db", check_same_thread=False)
+cur = conn.cursor()
+cur.execute("CREATE TABLE IF NOT EXISTS notes(id INTEGER PRIMARY KEY, text TEXT, embedding TEXT)")
+conn.commit()
+
+# ---------- models ----------
+class NoteIn(BaseModel):
+    text: str
+
+# ---------- helper ----------
+def get_embedding(text):
+    response = openai.embeddings.create(model="text-embedding-3-small", input=text)
+    return response.data[0].embedding
+
+def cosine(a, b):
+    a, b = np.array(a), np.array(b)
+    return np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))
+
+# ---------- routes ----------
+@app.post("/add_note")
+def add_note(note: NoteIn):
+    emb = get_embedding(note.text)
+    cur.execute("INSERT INTO notes(text, embedding) VALUES(?, ?)", (note.text, json.dumps(emb)))
+    conn.commit()
+    return {"status": "saved"}
+
+@app.get("/related/{note_id}")
+def related(note_id: int):
+    cur.execute("SELECT id, text, embedding FROM notes WHERE id=?", (note_id,))
+    target = cur.fetchone()
+    if not target: return []
+    target_emb = json.loads(target[2])
+    cur.execute("SELECT id, text, embedding FROM notes WHERE id != ?", (note_id,))
+    rows = cur.fetchall()
+    sims = [
+        {"id": r[0], "text": r[1], "score": cosine(target_emb, json.loads(r[2]))}
+        for r in rows
+    ]
+    sims.sort(key=lambda x: x["score"], reverse=True)
+    return sims[:3]
